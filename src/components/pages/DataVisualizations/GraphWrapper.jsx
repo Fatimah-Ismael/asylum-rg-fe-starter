@@ -10,7 +10,7 @@ import YearLimitsSelect from './YearLimitsSelect';
 import ViewSelect from './ViewSelect';
 import axios from 'axios';
 import { resetVisualizationQuery } from '../../../state/actionCreators';
-import test_data from '../../../data/test_data.json';
+//import test_data from '../../../data/test_data.json';
 import { colors } from '../../../styles/data_vis_colors';
 import ScrollToTopOnMount from '../../../utils/scrollToTopOnMount';
 
@@ -74,24 +74,32 @@ function GraphWrapper(props) {
     */
 
     if (office === 'all' || !office) {
+      const data = [];
       axios
-        .get(process.env.REACT_APP_API_URI, {
-          // mock URL, can be simply replaced by `${Real_Production_URL}/summary` in prod!
+        .get(`https://hrf-asylum-be-b.herokuapp.com/cases/fiscalSummary`, {
           params: {
             from: years[0],
             to: years[1],
           },
         })
         .then(result => {
-          stateSettingCallback(view, office, test_data); // <-- `test_data` here can be simply replaced by `result.data` in prod!
+          console.log([result.data]);
+          data.push(result.data);
         })
         .catch(err => {
           console.error(err);
         });
-    } else {
       axios
-        .get(process.env.REACT_APP_API_URI, {
-          // mock URL, can be simply replaced by `${Real_Production_URL}/summary` in prod!
+        .get(`https://hrf-asylum-be-b.herokuapp.com/cases/citizenshipSummary`)
+        .then(result => {
+          data[0]['citizenshipResults'] = result.data;
+          console.log([result.data]);
+          stateSettingCallback(view, office, data);
+        });
+    } else {
+      const data = [];
+      axios
+        .get(`https://hrf-asylum-be-b.herokuapp.com/cases/fiscalSummary`, {
           params: {
             from: years[0],
             to: years[1],
@@ -99,13 +107,21 @@ function GraphWrapper(props) {
           },
         })
         .then(result => {
-          stateSettingCallback(view, office, test_data); // <-- `test_data` here can be simply replaced by `result.data` in prod!
+          data.push(result.data);
+          //stateSettingCallback(view, office, result.data);
         })
         .catch(err => {
           console.error(err);
         });
+      axios
+        .get(`https://hrf-asylum-be-b.herokuapp.com/cases/citizenshipSummary`)
+        .then(result => {
+          data[0]['citizenshipResult'] = result.data;
+          stateSettingCallback(view, office, data);
+        });
     }
   }
+
   const clearQuery = (view, office) => {
     dispatch(resetVisualizationQuery(view, office));
   };
