@@ -22,7 +22,10 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import reducer from './state/reducers';
 import { colors } from './styles/data_vis_colors';
-
+import Profile from './components/profilePage';
+import Auth0ProviderWithHistory from './auth/auth0-provider-with-history';
+//import LoginButton from './components/login-button';
+import ProtectedRoute from './auth/protected-route';
 const { primary_accent_color } = colors;
 
 const store = configureStore({ reducer: reducer });
@@ -30,7 +33,9 @@ ReactDOM.render(
   <Router>
     <Provider store={store}>
       <React.StrictMode>
-        <App />
+        <Auth0ProviderWithHistory>
+          <App />
+        </Auth0ProviderWithHistory>
       </React.StrictMode>
     </Provider>
   </Router>,
@@ -46,14 +51,17 @@ export function App() {
           height: '10vh',
           display: 'flex',
           alignItems: 'center',
+          paddingTop: '5%',
           backgroundColor: primary_accent_color,
         }}
       >
         <HeaderContent />
       </Header>
+
       <Switch>
         <Route path="/" exact component={LandingPage} />
         <Route path="/graphs" component={GraphsContainer} />
+        <ProtectedRoute path="/profile" component={Profile} />
         <Route component={NotFoundPage} />
       </Switch>
       <Footer
